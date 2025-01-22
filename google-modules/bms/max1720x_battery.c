@@ -2608,24 +2608,10 @@ static int max1720x_get_property(struct power_supply *psy,
 		val->intval = reg_to_capacity_uah(chip->current_capacity, chip);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
-		/*
-		 * Snap charge_full to DESIGNCAP during early charge cycles to
-		 * prevent large fluctuations in FULLCAPNOM. MAX1720X_CYCLES LSB
-		 * is 16%
-		 */
-		rc = max1720x_get_cycle_count(chip);
-		if (rc < 0)
-			break;
-
-		/* rc is cycle_count */
-		if (rc <= FULLCAPNOM_STABILIZE_CYCLES)
-			rc = REGMAP_READ(map, MAX1720X_DESIGNCAP, &data);
-		else
-			rc = REGMAP_READ(map, MAX1720X_FULLCAPNOM, &data);
-
-		if (rc == 0)
-			val->intval = reg_to_capacity_uah(data, chip);
-		break;
+ 		rc = REGMAP_READ(map, MAX1720X_DESIGNCAP, &data); // Always read DESIGNCAP
+    		if (rc == 0)
+        	val->intval = reg_to_capacity_uah(data, chip);
+    		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
 		rc = REGMAP_READ(map, MAX1720X_DESIGNCAP, &data);
 		if (rc == 0)
